@@ -64,26 +64,40 @@ while len(total_data) < cnt_limit:
 
     total_data.extend(data_list)  # total_data를 업데이트 합니다.
 
-    # 다음 페이지로 이동
-    browser.execute_script("""
-        document
-            .querySelector("#sub")
-            .contentDocument.querySelector("html > frameset > frame:nth-child(2)")
-            .contentDocument.querySelector("#pagination > a.default").click();
-    """)
-    
-    time.sleep(1)
-    WebDriverWait(browser, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#sub"))
-    )
+
+    try:
+        # 다음 페이지로 이동
+        browser.execute_script("""
+            document
+                .querySelector("#sub")
+                .contentDocument.querySelector("html > frameset > frame:nth-child(2)")
+                .contentDocument.querySelector("#pagination > a.default").click();
+        """)
+            
+        time.sleep(1)
+        WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#sub"))
+        )
+    except:
+        break
 
 # 검색 결과를 텍스트 파일에 저장
-with open(txt_file, "w", encoding="utf8") as f:
-    for i, sample_item in enumerate(total_data):
-        f.write(f"{i + 1}번쨰 공고내용을 추출합니다~~~~\n")
-        #... 이곳에 저장할 내용 작성
-        f.write("\n")
+with open(txt_file, "w", encoding="utf8") as fp:
+    for i, sample in enumerate(total_data):
+        fp.write(f"{i + 1}번쨰 공고내용을 추출합니다~~~~\n")
+        fp.write(f"1.업무: {sample[0]}\n")
+        fp.write(f"2.공고번호-치수: {sample[1]}\n")
+        fp.write(f"3.분류: {sample[2]}\n")
+        fp.write(f"4.공고명: {sample[3]}\n")
+        fp.write(f"5.URL 주소: {sample[4]}\n")
+        fp.write(f"6.공고기관: {sample[5]}\n")
+        fp.write(f"7.수요기관: {sample[6]}\n")
+        fp.write(f"8.계약방법: {sample[7]}\n")
+        fp.write(f"9.입력일시(입찰마감일시): {sample[8]}\n")
+        fp.write(f"10.공동수급: {sample[9]}\n")
+        fp.write(f"11.투찰여부: {sample[10]}\n")
+        fp.write("\n")
 
 # 검색 결과를 엑셀 파일에 저장
-result_df = pd.DataFrame(total_data, columns=["공고명", "공고일자", "입찰마감일자", "가격"])
+result_df = pd.DataFrame(total_data, columns=["업무", "공고번호-치수", "분류", "공고명", "URL 주소", "공고기관", "수요기관", "계약방법", "입력일시(입찰마감일시)", "공동수급", "투찰여부"])
 result_df.to_excel(xlsx_file, index=False)
